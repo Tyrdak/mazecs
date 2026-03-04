@@ -145,33 +145,36 @@ Console.ResetColor();
 // ── Boucle de jeu ──
 
 var won = false;
+var running = true;
 
-while (!won)
+while (running && !won)
 {
     var key = Console.ReadKey(true).Key;
 
     var nx2 = playerX;
     var ny2 = playerY;
 
-    if (key == ConsoleKey.Z || key == ConsoleKey.UpArrow)
+    switch (key)
     {
-        ny2--;
-    }
-    else if (key == ConsoleKey.S || key == ConsoleKey.DownArrow)
-    {
-        ny2++;
-    }
-    else if (key == ConsoleKey.Q || key == ConsoleKey.LeftArrow)
-    {
-        nx2--;
-    }
-    else if (key == ConsoleKey.D || key == ConsoleKey.RightArrow)
-    {
-        nx2++;
-    }
-    else if (key == ConsoleKey.Escape)
-    {
-        break;
+        case ConsoleKey.Z or ConsoleKey.UpArrow:
+            ny2--;
+            break;
+
+        case ConsoleKey.S or ConsoleKey.DownArrow:
+            ny2++;
+            break;
+
+        case ConsoleKey.Q or ConsoleKey.LeftArrow:
+            nx2--;
+            break;
+
+        case ConsoleKey.D or ConsoleKey.RightArrow:
+            nx2++;
+            break;
+
+        case ConsoleKey.Escape:
+            running = false;
+            break;
     }
 
     if (nx2 >= 0 && nx2 < width && ny2 >= 0 && ny2 < height && grid[nx2, ny2] != CellType.Wall)
@@ -216,29 +219,17 @@ Console.ReadKey(true);
 void DrawCell(int cx, int cy)
 {
     Console.SetCursorPosition(offsetX + cx, offsetY + cy);
-    var cell = grid[cx, cy];
 
-    if (cell == CellType.Wall)
+    var (color, pattern) = grid[cx, cy] switch
     {
-        Console.ForegroundColor = wallColor;
-        Console.Write("█");
-    }
-    else if (cell == CellType.Player)
-    {
-        Console.ForegroundColor = playerColor;
-        Console.Write("@");
-    }
-    else if (cell == CellType.Exit)
-    {
-        Console.ForegroundColor = exitColor;
-        Console.Write("★");
-    }
-    else
-    {
-        Console.ForegroundColor = corridorColor;
-        Console.Write("·");
-    }
+        CellType.Wall   => (wallColor,     "█"),
+        CellType.Player => (playerColor,   "@"),
+        CellType.Exit   => (exitColor,     "★"),
+        _               => (corridorColor, "·")
+    };
 
+    Console.ForegroundColor = color;
+    Console.Write(pattern);
     Console.ResetColor();
 }
 
