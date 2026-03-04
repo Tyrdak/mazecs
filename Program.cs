@@ -167,57 +167,32 @@ void GenerateMaze(CellType[,] grid, int startX, int startY)
         for (int x = 0; x < width; x++)
             grid[x, y] = CellType.Wall;
 
-    var stackX = new int[cellW * cellH];
-    var stackY = new int[cellW * cellH];
-    var stackTop = 0;
-
-    var visited = new bool[cellW, cellH];
-
     var dx = new[] { 0, 1, 0, -1 };
     var dy = new[] { -1, 0, 1, 0 };
 
     var rng = new Random();
 
-    visited[startX, startY] = true;
-    grid[startX * 2, startY * 2] = CellType.Corridor;
-
-    stackX[stackTop] = startX;
-    stackY[stackTop] = startY;
-    stackTop++;
-
-    while (stackTop > 0)
+    void Carve(int cx, int cy)
     {
-        var cx = stackX[stackTop - 1];
-        var cy = stackY[stackTop - 1];
+        grid[cx * 2, cy * 2] = CellType.Corridor;
 
         var directions = new[] { 0, 1, 2, 3 };
         rng.Shuffle(directions);
-
-        var found = false;
 
         foreach (var dir in directions)
         {
             var nx = cx + dx[dir];
             var ny = cy + dy[dir];
 
-            if (nx >= 0 && nx < cellW && ny >= 0 && ny < cellH && !visited[nx, ny])
+            if (nx >= 0 && nx < cellW && ny >= 0 && ny < cellH && grid[nx * 2, ny * 2] == CellType.Wall)
             {
                 grid[cx * 2 + dx[dir], cy * 2 + dy[dir]] = CellType.Corridor;
-                grid[nx * 2, ny * 2] = CellType.Corridor;
-
-                visited[nx, ny] = true;
-
-                stackX[stackTop] = nx;
-                stackY[stackTop] = ny;
-                stackTop++;
-
-                found = true;
-                break;
+                Carve(nx, ny);
             }
         }
-
-        if (!found) stackTop--;
     }
+
+    Carve(startX, startY);
 
     grid[startX * 2, startY * 2] = CellType.Player;
     grid[exitX, exitY] = CellType.Exit;
